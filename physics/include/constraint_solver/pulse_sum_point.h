@@ -37,7 +37,7 @@ private:
   phys_vec3 &object_vel_();
   phys_vec3 &object_col_pt_();
   void set_object_vel( phys_vec3 &object_vel );
-  void set_object_col_pt( phys_vec3 &object_col_p );
+  void set_object_col_pt( const phys_vec3 &object_col_p );
   const phys_vec3 phys_diag_multiply_and_square( phys_vec3 &v1, phys_vec3 &v2 );
   void SOLVER_apply_relaxation( float &error_sq );
   void SOLVER_solver_prolog( const float delta_t );
@@ -45,9 +45,9 @@ private:
 
 public:
   void set( rigid_body *const b1,
-            phys_vec3 &b1_r,
+            const phys_vec3 &b1_r,
             rigid_body *const b2,
-            phys_vec3 &b2_r,
+            const phys_vec3 &b2_r,
             pulse_sum_cache *const ps_cache,
             const float delta_t,
             const bool is_spring,

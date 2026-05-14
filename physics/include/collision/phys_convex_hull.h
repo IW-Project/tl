@@ -10,7 +10,7 @@ public:
   {
     phys_vec3 m_normal;
     phys_vec3 *m_verts[3];
-    const float get_dist( const phys_vec3 & );
+    const float get_dist( const phys_vec3 &vert ) { return phys_dot( m_normal, vert - m_verts[0][0] ); }
   };
   struct ch_edge
   {
@@ -250,7 +250,7 @@ public:
       }
     }
   }
-  
+
   inline void compute_convex_hull( const int max_verts, const float min_expansion_volume_percent )
   {
     tlAssert( max_verts >= 3 );
@@ -320,7 +320,8 @@ public:
 
       create_edge_list( **best_vert );
 
-      for ( intermediate_edge_list_t::iterator edge_i = m_intermediate_edge_list.begin(); edge_i != m_intermediate_edge_list.end(); edge_i++ )
+      for ( intermediate_edge_list_t::iterator edge_i = m_intermediate_edge_list.begin(); edge_i != m_intermediate_edge_list.end();
+            edge_i++ )
       {
         ch_edge *edge = &( *edge_i );
         create_intermediate_triangle( *best_vert, edge->m_verts[0], edge->m_verts[1] );

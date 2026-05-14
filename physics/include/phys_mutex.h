@@ -8,6 +8,11 @@ class minspec_mutex
 public:
   volatile unsigned int m_token;
 
+  minspec_mutex()
+  {
+    m_token = 0;
+  }
+
   void Lock()
   {
     while ( !tlAtomicCompareAndSwap( &this->m_token, 1u, 0 ) )

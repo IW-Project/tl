@@ -77,6 +77,7 @@ void PMM_FREE( void *ptr, const size_t size, const u32 alignment );
 void *PSP_ALLOC( void *slot_pool );
 void PMM_VALIDATE( void *ptr, const size_t size, const u32 alignment );
 char *PHYS_ALIGN( char *pos, int alignment );
+inline size_t PHYS_ALIGN( size_t p, const int a  ) { return tl_align( p, a ); }
 phys_slot_pool *GET_PHYS_SLOT_POOL( unsigned int size, unsigned int alignment );
 void phys_memory_manager_init( void *memory_buffer, const int memory_buffer_size );
 void phys_memory_manager_term();

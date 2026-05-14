@@ -285,6 +285,7 @@ inline broad_phase_info_env *allocate_bpi_env()
     first = G_BPM->m_list_bpi_env;
     bpi_env->m_list_bpb_cluster_next = first;
   } while ( !tlAtomicCompareAndSwap( (volatile u32 *)&G_BPM->m_list_bpi_env, (u32)bpi_env, (u32)first ) );
+  return bpi_env;
 }
 
 inline const phys_surface_type_info *surface_type_info_database_get( const int surface_type_1, const int surface_type_2 )

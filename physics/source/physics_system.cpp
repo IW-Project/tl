@@ -61,6 +61,27 @@ T *create( list_type *list_name, rigid_body *const b1, rigid_body *const b2, con
   return rbc;
 }
 
+template rigid_body_constraint_point *create<phys_free_list<rigid_body_constraint_point>, rigid_body_constraint_point>(
+    phys_free_list<rigid_body_constraint_point> *, rigid_body *const, rigid_body *const, const int, const char *);
+template rigid_body_constraint_hinge *create<phys_free_list<rigid_body_constraint_hinge>, rigid_body_constraint_hinge>(
+    phys_free_list<rigid_body_constraint_hinge> *, rigid_body *const, rigid_body *const, const int, const char *);
+template rigid_body_constraint_distance *create<phys_free_list<rigid_body_constraint_distance>, rigid_body_constraint_distance>(
+    phys_free_list<rigid_body_constraint_distance> *, rigid_body *const, rigid_body *const, const int, const char *);
+template rigid_body_constraint_ragdoll *create<phys_free_list<rigid_body_constraint_ragdoll>, rigid_body_constraint_ragdoll>(
+    phys_free_list<rigid_body_constraint_ragdoll> *, rigid_body *const, rigid_body *const, const int, const char *);
+template rigid_body_constraint_wheel *create<phys_free_list<rigid_body_constraint_wheel>, rigid_body_constraint_wheel>(
+    phys_free_list<rigid_body_constraint_wheel> *, rigid_body *const, rigid_body *const, const int, const char *);
+template rigid_body_constraint_angular_actuator *create<phys_free_list<rigid_body_constraint_angular_actuator>, rigid_body_constraint_angular_actuator>(
+    phys_free_list<rigid_body_constraint_angular_actuator> *, rigid_body *const, rigid_body *const, const int, const char *);
+template rigid_body_constraint_upright *create<phys_free_list<rigid_body_constraint_upright>, rigid_body_constraint_upright>(
+    phys_free_list<rigid_body_constraint_upright> *, rigid_body *const, rigid_body *const, const int, const char *);
+template rigid_body_constraint_custom_orientation *create<phys_free_list<rigid_body_constraint_custom_orientation>, rigid_body_constraint_custom_orientation>(
+    phys_free_list<rigid_body_constraint_custom_orientation> *, rigid_body *const, rigid_body *const, const int, const char *);
+template rigid_body_constraint_custom_path *create<phys_free_list<rigid_body_constraint_custom_path>, rigid_body_constraint_custom_path>(
+    phys_free_list<rigid_body_constraint_custom_path> *, rigid_body *const, rigid_body *const, const int, const char *);
+template rigid_body_constraint_contact *create<phys_free_list<rigid_body_constraint_contact>, rigid_body_constraint_contact>(
+    phys_free_list<rigid_body_constraint_contact> *, rigid_body *const, rigid_body *const, const int, const char *);
+
 user_rigid_body *phys_sys::get_user_rigid_body( const phys_mat44 *const dictactor )
 {
   for ( phys_free_list<user_rigid_body>::iterator it = g_physics_system->m_list_user_rigid_body.begin(); it != g_physics_system->m_list_user_rigid_body.end(); ++it )

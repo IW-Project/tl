@@ -5,7 +5,7 @@
 
 using namespace math;
 
-void pulse_sum_normal::set_flag( const u32 f, const bool b )
+inline void pulse_sum_normal::set_flag( const u32 f, const bool b )
 {
   if ( b )
   {
@@ -17,12 +17,12 @@ void pulse_sum_normal::set_flag( const u32 f, const bool b )
   }
 }
 
-const u32 pulse_sum_normal::get_flag( const u32 f )
+inline const u32 pulse_sum_normal::get_flag( const u32 f )
 {
   return f & m_flags;
 }
 
-void pulse_sum_normal::calc_abs( const phys_vec3 &b1_r_displace )
+inline void pulse_sum_normal::calc_abs( const phys_vec3 &b1_r_displace )
 {
   phys_vec3 v = m_b1_r + b1_r_displace;
   m_b1_ap = phys_multiply( m_b1->m_world_inv_inertia, phys_cross( v, m_ud ) );
@@ -34,7 +34,7 @@ void pulse_sum_normal::calc_abs( const phys_vec3 &b1_r_displace )
   }
 }
 
-const float pulse_sum_normal::get_vel()
+inline const float pulse_sum_normal::get_vel()
 {
   phys_vec3 t_vel = m_b1->m_rb->get_t_vel();
   phys_vec3 a_vel = m_b1->m_rb->get_a_vel();
@@ -57,7 +57,7 @@ const float pulse_sum_normal::get_vel()
   return phys_dot( v, m_ud );
 }
 
-const float pulse_sum_normal::get_last_vel()
+inline const float pulse_sum_normal::get_last_vel()
 {
   phys_vec3 v = LAST_T_VEL( m_b1->m_rb ) + phys_cross( LAST_A_VEL( m_b1->m_rb ), m_b1_r );
   if ( m_b2 )
@@ -72,34 +72,54 @@ const float pulse_sum_normal::get_last_vel()
   return phys_dot( v, m_ud );
 }
 
-const float pulse_sum_normal::get_pos()
+inline const float pulse_sum_normal::get_pos()
 {
   phys_vec3 v = ( m_b1->m_rb->get_mat().GetW() + m_b1_r ) - ( m_b2 ? m_b2->m_rb->get_mat().GetW() + m_b2_r : object_col_pt_() );
   return phys_dot( v, m_ud );
 }
 
-phys_vec3 &pulse_sum_normal::object_vel_()
+inline phys_vec3 &pulse_sum_normal::object_vel_()
 {
   return m_b2_ap;
 }
 
-phys_vec3 &pulse_sum_normal::object_col_pt_()
+inline phys_vec3 &pulse_sum_normal::object_col_pt_()
 {
   return m_b2_r;
 }
 
-const float pulse_sum_normal::clamp_pulse_sum( const float ps )
+inline const float pulse_sum_normal::clamp_pulse_sum( const float ps )
 {
-  if ( get_flag( 1u ) )
+  if ( get_flag( PULSE_LIMIT_PARENT_RATIO ) )
   {
-    tlAssert( m_pulse_parent );
-    tlAssert( m_pulse_limit_ratio >= 0.0f );
+    tlAssert( m_pulse_parent )
+    tlAssert( m_pulse_limit_ratio >= 0.0f )
     m_pulse_sum_max = m_pulse_limit_ratio * Abs( m_pulse_parent->get_pulse_sum() );
     m_pulse_sum_min = -m_pulse_sum_max;
   }
+  tlAssert(m_pulse_sum_min <= m_pulse_sum_max)
+  if (m_pulse_sum_min <= ps)
+  {
+    if (ps <= m_pulse_sum_max)
+    {
+      set_flag( PULSE_LIMIT_REACHED, false );
+      return ps;
+    }
+    else
+    {
+      set_flag( PULSE_LIMIT_REACHED, true );
+      return m_pulse_sum_max;
+    }
+  }
+  else
+  {
+    set_flag( PULSE_LIMIT_REACHED, true );
+    return m_pulse_sum_min;
+  }
+
 }
 
-const float pulse_sum_normal::get_objective()
+inline const float pulse_sum_normal::get_objective()
 {
   phys_vec3 _a = m_b1->a_vel;
   phys_vec3 _b = phys_cross( _a, m_b1_r );
@@ -113,7 +133,7 @@ const float pulse_sum_normal::get_objective()
   return phys_dot( relv, m_ud );
 }
 
-void pulse_sum_normal::apply( float &s_ )
+inline void pulse_sum_normal::apply( float &s_ )
 {
   phys_vec3 _v = ( s_ * m_b1->m_inv_mass ) * m_ud;
   m_b1->t_vel += _v;
@@ -126,13 +146,13 @@ void pulse_sum_normal::apply( float &s_ )
   }
 }
 
-void pulse_sum_normal::project()
+inline void pulse_sum_normal::project()
 {
   m_pulse_sum = clamp_pulse_sum( m_pulse_sum );
   apply( m_pulse_sum );
 }
 
-void pulse_sum_normal::SOLVER_apply_relaxation( float &error_sq, const bool add_error )
+inline void pulse_sum_normal::SOLVER_apply_relaxation( float &error_sq, const bool add_error )
 {
   float m_last_pulse_sum = m_pulse_sum;
   m_pulse_sum = clamp_pulse_sum( m_last_pulse_sum - ( ( ( get_objective() + ( m_cfm * m_last_pulse_sum ) ) - m_right_side ) / m_denom ) );
@@ -149,20 +169,20 @@ void pulse_sum_normal::SOLVER_apply_relaxation( float &error_sq, const bool add_
   }
 }
 
-void pulse_sum_normal::SOLVER_solver_prolog( const float delta_t )
+inline void pulse_sum_normal::SOLVER_solver_prolog( const float delta_t )
 {
   m_right_side = m_right_side - get_vel();
   m_pulse_sum = delta_t * m_pulse_sum_cache->get_pulse_sum();
   project();
 }
 
-void pulse_sum_normal::SOLVER_solver_intermediate( const float delta_t )
+inline void pulse_sum_normal::SOLVER_solver_intermediate( const float delta_t )
 {
   m_pulse_sum_cache->set_pulse_sum( m_pulse_sum / delta_t );
   m_right_side = m_right_side + m_big_dirt;
 }
 
-void pulse_sum_normal::set( rigid_body *const b1,
+inline void pulse_sum_normal::set( rigid_body *const b1,
                             const phys_vec3 &b1_r,
                             rigid_body *const b2,
                             const phys_vec3 &b2_r,
@@ -213,31 +233,7 @@ void pulse_sum_normal::set( rigid_body *const b1,
   calc_abs( b1_r_displace );
 }
 
-const phys_vec3 pulse_sum_normal::get_relative_velocity_change_dir()
-{
-  phys_vec3 vc_dir = ( m_b1->m_inv_mass * m_ud ) + phys_cross( m_b1_ap, m_ud );
-  if ( m_b2 )
-  {
-    vc_dir += ( m_b2->m_inv_mass * m_ud ) + phys_cross( m_b2_ap, m_ud );
-  }
-
-  return vc_dir;
-}
-
-const phys_vec3 pulse_sum_normal::get_relative_velocity()
-{
-  phys_vec3 v = m_b1->m_rb->get_t_vel() + phys_cross( m_b1->m_rb->get_a_vel(), m_b1_r );
-  if ( m_b2 )
-  {
-    v -= ( m_b2->m_rb->get_t_vel() + phys_cross( m_b2->m_rb->get_a_vel(), m_b2_r ) );
-  }
-  else
-  {
-    v -= object_vel_();
-  }
-}
-
-const float pulse_sum_normal::get_unclamped_pulse_sum()
+inline const float pulse_sum_normal::get_unclamped_pulse_sum()
 {
   float v_ = get_objective();
   return clamp_pulse_sum( m_pulse_sum + ( ( ( m_right_side - v_ ) - ( m_cfm * m_pulse_sum ) ) / m_denom ) );

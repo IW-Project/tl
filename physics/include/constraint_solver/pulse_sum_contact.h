@@ -86,3 +86,5 @@ public:
                                   const float min_restitution_impact_vel_sq );
   pulse_sum_contact_point();
 };
+
+#include "pulse_sum_contact_inline.h"

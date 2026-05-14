@@ -194,7 +194,7 @@ inline void pulse_sum_point::set_object_vel( phys_vec3 &object_vel )
   m_b2_apx = object_vel;
 }
 
-inline void pulse_sum_point::set_object_col_pt( phys_vec3 &object_col_p )
+inline void pulse_sum_point::set_object_col_pt( const phys_vec3 &object_col_p )
 {
   tlAssert( m_b2 == NULL );
   m_b2_r = object_col_p;
@@ -252,9 +252,9 @@ inline void pulse_sum_point::SOLVER_solver_intermediate( const float delta_t )
 }
 
 inline void pulse_sum_point::set( rigid_body *const b1,
-                           phys_vec3 &b1_r,
+                           const phys_vec3 &b1_r,
                            rigid_body *const b2,
-                           phys_vec3 &b2_r,
+                           const phys_vec3 &b2_r,
                            pulse_sum_cache *const ps_cache,
                            const float delta_t,
                            const bool is_spring,

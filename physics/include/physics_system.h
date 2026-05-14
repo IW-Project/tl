@@ -8,7 +8,7 @@
 #include "physics_system_internal.h"
 
 template <typename list_type, typename T>
-T *create( list_type *list_name, const rigid_body *const b1, const rigid_body *const b2, const int no_error, const char *error_msg );
+T *create( list_type *list_name, rigid_body *const b1, rigid_body *const b2, const int no_error, const char *error_msg );
 
 class phys_sys
 {
@@ -168,3 +168,4 @@ public:
   static void phys_init();
   static void phys_shutdown();
 };
+

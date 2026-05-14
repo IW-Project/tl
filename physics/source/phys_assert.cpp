@@ -5,6 +5,7 @@ void( __cdecl *g_phys_debug_callback )( void * );
 phys_assert_info *g_list_phys_assert_info;
 phys_assert_info pai_gjk_cache_system_max_num_gjk_ci( 0, 1, true );
 phys_assert_info pai_check_terrain_query_params( 0, 1, true );
+phys_assert_info pai_create_pulse_sum_contact(0, 2, true );
 
 void phys_set_debug_callback( void ( *debug_callback )( void * ) )
 {

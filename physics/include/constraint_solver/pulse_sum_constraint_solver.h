@@ -31,11 +31,11 @@ public:
 
     struct avl_tree_accessor
     {
-      phys_inplace_avl_tree_node<temp_user_rigid_body> *get_avl_node( temp_user_rigid_body *turb ) { return &turb->m_avl_tree_node; }
+      static phys_inplace_avl_tree_node<temp_user_rigid_body> *get_avl_node( temp_user_rigid_body *turb ) { return &turb->m_avl_tree_node; }
 
-      user_rigid_body *get_avl_key( temp_user_rigid_body *turb ) { return turb->m_avl_key; }
+      static user_rigid_body *get_avl_key( const temp_user_rigid_body *turb ) { return turb->m_avl_key; }
 
-      inline void set_avl_key( temp_user_rigid_body *turb, user_rigid_body *avl_key ) { turb->m_avl_key = avl_key; }
+      static void set_avl_key( temp_user_rigid_body *turb, user_rigid_body *avl_key ) { turb->m_avl_key = avl_key; }
     };
 
     inline void set( user_rigid_body *original_urb ) { m_avl_key = original_urb; }
@@ -89,39 +89,82 @@ public:
   list_pulse_sum_contact m_list_pulse_sum_contact;
   void solve_iterative( const int max_iters, const float max_error_sq );
   void solve_constraints( rigid_body *const head );
-  void execute_constraint_solver( const rigid_body * );
-  void set_pulse_sum( const pulse_sum_cache *, const float );
-  const float get_pulse_sum( const pulse_sum_cache * );
-  pulse_sum_node *create_pulse_sum_node();
-  pulse_sum_normal *create_pulse_sum_normal();
+  void execute_constraint_solver( rigid_body *head );
+  void set_pulse_sum( pulse_sum_cache *const psc, const float ps );
+  const float get_pulse_sum( const pulse_sum_cache * ) const;
+  pulse_sum_node *create_pulse_sum_node()
+  {
+    TRANSIENT_ALLOCATE_CONSTRUCT( psn, m_solver_memory_allocator, 1, pulse_sum_node );
+    m_list_pulse_sum_node.add( psn );
+    return psn;
+  }
+  pulse_sum_normal *create_pulse_sum_normal()
+  {
+    TRANSIENT_ALLOCATE_CONSTRUCT( psn, m_solver_memory_allocator, 1, pulse_sum_normal );
+    m_list_pulse_sum_normal.add( psn );
+    return psn;
+  }
   pulse_sum_normal *create_pulse_sum_normal_();
-  void create_point( rigid_body *const b1,
-                     const phys_vec3 &b1_r,
-                     rigid_body *const b2,
-                     const phys_vec3 &b2_r,
-                     pulse_sum_cache *const ps_cache,
-                     const float delta_t,
-                     const bool is_spring,
-                     const float spring_k,
-                     const float damp_k );
+  inline void create_point( rigid_body *const b1,
+                            const phys_vec3 &b1_r,
+                            rigid_body *const b2,
+                            const phys_vec3 &b2_r,
+                            pulse_sum_cache *const ps_cache,
+                            const float delta_t,
+                            const bool is_spring,
+                            const float spring_k,
+                            const float damp_k )
+  {
+    TRANSIENT_ALLOCATE_CONSTRUCT( psp, m_solver_memory_allocator, 1, pulse_sum_point );
+    psp->set( b1, b1_r, b2, b2_r, ps_cache, delta_t, is_spring, spring_k, damp_k );
+  }
   pulse_sum_angular *create_pulse_sum_angular( rigid_body *const b1,
                                                const phys_vec3 &b1_r,
                                                rigid_body *const b2,
                                                const phys_vec3 &b2_r,
                                                const phys_vec3 &ud,
-                                               pulse_sum_cache *const ps_cache );
-  pulse_sum_wheel *create_pulse_sum_wheel();
-  pulse_sum_normal *create_pulse_sum_wheel_side( pulse_sum_wheel * );
-  pulse_sum_normal *create_pulse_sum_wheel_fwd( pulse_sum_wheel * );
-  pulse_sum_contact *create_pulse_sum_contact( rigid_body *, rigid_body *, contact_point_info *, const float );
-  void create_hinge( rigid_body *const,
-                     const phys_vec3 &,
-                     rigid_body *const,
-                     const phys_vec3 &,
-                     const phys_vec3 &,
-                     const phys_vec3 &,
-                     pulse_sum_cache *const,
-                     const float );
-  pulse_sum_constraint_solver();
-  ~pulse_sum_constraint_solver();
+                                               pulse_sum_cache *const ps_cache )
+  {
+    TRANSIENT_ALLOCATE_CONSTRUCT( psa, m_solver_memory_allocator, 1, pulse_sum_angular );
+    m_list_pulse_sum_angular.add( psa );
+    psa->set( b1, b1_r, b2, b2_r, ud, ps_cache );
+    return psa;
+  }
+  pulse_sum_wheel *create_pulse_sum_wheel()
+  {
+    TRANSIENT_ALLOCATE_CONSTRUCT( psw, m_solver_memory_allocator, 1, pulse_sum_wheel );
+    m_list_pulse_sum_wheel.add( psw );
+    return psw;
+  }
+  pulse_sum_normal *create_pulse_sum_wheel_side( pulse_sum_wheel *psw )
+  {
+    pulse_sum_normal *psn = create_pulse_sum_normal();
+    psw->m_side = psn;
+    return psn;
+  }
+  pulse_sum_normal *create_pulse_sum_wheel_fwd( pulse_sum_wheel *psw )
+  {
+    pulse_sum_normal *psn = create_pulse_sum_normal();
+    psw->m_fwd = psn;
+    return psn;
+  }
+  pulse_sum_contact *create_pulse_sum_contact( rigid_body *b1, rigid_body *b2, contact_point_info *cpi, const float delta_t );
+  void create_hinge( rigid_body *const b1,
+                     const phys_vec3 &b1_axis,
+                     rigid_body *const b2,
+                     const phys_vec3 &b2_axis,
+                     const phys_vec3 &a1,
+                     const phys_vec3 &a2,
+                     pulse_sum_cache *const ps_cache,
+                     const float delta_t )
+  {
+    pulse_sum_angular* psa = create_pulse_sum_angular(b1, b1_axis, b2, b2_axis, a1, ps_cache);
+    psa->set_pulse_sum_limits_unbounded();
+    psa->setup_vel_bi_standard( delta_t );
+    psa = create_pulse_sum_angular(b1, b1_axis, b2, b2_axis, a2, ps_cache);
+    psa->set_pulse_sum_limits_unbounded();
+    psa->setup_vel_bi_standard( delta_t );
+  }
 };
+
+#include "pulse_sum_constraint_solver_inline.h"

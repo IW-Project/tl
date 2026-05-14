@@ -330,6 +330,11 @@ void transient_allocator_update_largest_size( const int size )
   ;
 }
 
+void PSP_FREE( void *slot_pool, void *slot )
+{
+  reinterpret_cast<phys_slot_pool *>( slot_pool )->free_slot( slot );
+}
+
 void *PMM_PERM_ALLOCATE( const size_t size, const u32 alignment )
 {
   void *ptr = g_phys_memory_manager->allocate( size, alignment );

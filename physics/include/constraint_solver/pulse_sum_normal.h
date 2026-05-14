@@ -7,7 +7,6 @@
 #include "pulse_sum_cache.h"
 
 #pragma pack( push, 16 )
-
 class pulse_sum_normal : public phys_link_list_base<pulse_sum_normal>
 {
   enum flags_e
@@ -231,5 +230,6 @@ public:
   friend class rigid_body_constraint;
   friend class rigid_body_constraint_wheel;
 };
-
 #pragma pack( pop )
+
+#include "pulse_sum_normal_inline.h"

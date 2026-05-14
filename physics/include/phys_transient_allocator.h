@@ -38,8 +38,8 @@ public:
   }
   ~phys_transient_allocator() { tlAssert( m_first_block == NULL ); }
 
-  void *allocate( const int size, const int alignment, const int no_error, char *error_msg );
-  void *mt_allocate( const int size, const int alignment, const int no_error, char *error_msg );
+  void *allocate( const int size, const int alignment, const int no_error, char *error_msg = "" );
+  void *mt_allocate( const int size, const int alignment, const int no_error, char *error_msg = "" );
   void reset();
 
   const allocator_state capture_state();
@@ -74,4 +74,15 @@ private:
   if ( name )                                                                                   \
   {                                                                                             \
     new ( name ) type();                                                                        \
+  }
+
+#define TRANSIENT_ALLOCATE_CONSTRUCT_ALIGNED( name, allocator, size, type )                                      \
+  type *name = (type *)allocator.allocate(                                                                       \
+      sizeof( type ) * size + PHYS_ALIGN( sizeof( type ), tl_max( __alignof( type ), PHYS_MEM_MIN_ALIGNMENT ) ), \
+      tl_max( __alignof( type ), PHYS_MEM_MIN_ALIGNMENT ),                                                       \
+      0,                                                                                                         \
+      "phys_transient_allocator out of memory." );                                                               \
+  if ( name )                                                                                                    \
+  {                                                                                                              \
+    new ( name ) type();                                                                                         \
   }

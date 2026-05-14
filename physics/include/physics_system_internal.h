@@ -35,8 +35,8 @@ public:
   };
 
   const uint get_flag( const uint f ) { return f & m_flags; }
-  void set_flag( const uint f, uint b );
-  void set_outside_sub_delta_t( const float );
+  void set_flag( const uint f, uint b ) { b ? m_flags |= f : m_flags &= ~f; }
+  void set_outside_sub_delta_t( const float outside_sub_delta_t ) { m_outside_sub_delta_t = outside_sub_delta_t; }
   int m_flags;
   float m_outside_sub_delta_t;
   phys_collision_callback_t m_collision_callback;
@@ -78,6 +78,7 @@ public:
 };
 
 extern physics_system *g_physics_system;
+extern int g_list_island_cur;
 
 inline uint get_physics_system_flag( const uint f )
 {
@@ -90,3 +91,4 @@ inline float get_physics_system_outside_sub_delta_t()
 }
 
 void verify_is_in_physics_system( rigid_body_constraint_contact *rbc, rigid_body *b1_, rigid_body *b2_ );
+void constraint_solver_process( phys_transient_allocator *transient_buffer, physics_system *psys, const float outside_delta_t );

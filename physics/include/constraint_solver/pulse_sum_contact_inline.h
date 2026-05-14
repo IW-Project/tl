@@ -4,7 +4,7 @@
 #include "rigid_body_internal.h"
 #include "pulse_sum_point.h"
 
-void pulse_sum_contact_point::calc_abs( pulse_sum_contact *psc )
+inline void pulse_sum_contact_point::calc_abs( pulse_sum_contact *psc )
 {
   phys_vec3 b1_t_n = phys_cross( m_b1_r, psc->m_ud_n );
   m_b1_ap_n = phys_multiply( psc->m_b1->m_world_inv_inertia, b1_t_n );
@@ -47,7 +47,7 @@ void pulse_sum_contact_point::calc_abs( pulse_sum_contact *psc )
   m_inv_zz = m_denom_yy * ( 1.0f / det );
 }
 
-const float pulse_sum_contact_point::get_impact_vel( pulse_sum_contact *psc )
+inline const float pulse_sum_contact_point::get_impact_vel( pulse_sum_contact *psc )
 {
   phys_vec3 last_t_vel = rbint::get_last_t_vel( psc->m_b1->m_rb );
   phys_vec3 last_a_vel = rbint::get_last_a_vel( psc->m_b1->m_rb );
@@ -90,7 +90,7 @@ const float pulse_sum_contact_point::get_impact_vel( pulse_sum_contact *psc )
   return tl_max( a, b );
 }
 
-const phys_vec3 pulse_sum_contact_point::get_vel( pulse_sum_contact *psc )
+inline const phys_vec3 pulse_sum_contact_point::get_vel( pulse_sum_contact *psc )
 {
   phys_vec3 last_t_vel = rbint::get_last_t_vel( psc->m_b1->m_rb );
   phys_vec3 last_a_vel = rbint::get_last_a_vel( psc->m_b1->m_rb );
@@ -114,14 +114,14 @@ const phys_vec3 pulse_sum_contact_point::get_vel( pulse_sum_contact *psc )
   return phys_vec3( phys_dot( retv, psc->m_ud_n ), phys_dot( retv, psc->m_ud_f1 ), phys_dot( retv, psc->m_ud_f2 ) );
 }
 
-const float pulse_sum_contact_point::get_pos( pulse_sum_contact *psc )
+inline const float pulse_sum_contact_point::get_pos( pulse_sum_contact *psc )
 {
   return phys_dot( ( ( psc->m_b1->m_rb->get_mat().GetW() ) + m_b1_r ) -
                        ( psc->m_b2 ? ( psc->m_b2->m_rb->get_mat().GetW() ) + m_b2_r : object_col_pt_() ),
                    psc->m_ud_n );
 }
 
-const phys_vec3 pulse_sum_contact_point::get_objective( pulse_sum_contact *psc )
+inline const phys_vec3 pulse_sum_contact_point::get_objective( pulse_sum_contact *psc )
 {
   phys_vec3 _a = psc->m_b1->a_vel;
   phys_vec3 _b = phys_cross( _a, m_b1_r );
@@ -135,7 +135,7 @@ const phys_vec3 pulse_sum_contact_point::get_objective( pulse_sum_contact *psc )
   return phys_vec3( phys_dot( retv, psc->m_ud_n ), phys_dot( retv, psc->m_ud_f1 ), phys_dot( retv, psc->m_ud_f2 ) );
 }
 
-void pulse_sum_contact_point::apply( pulse_sum_contact *psc, phys_vec3 &s_ )
+inline void pulse_sum_contact_point::apply( pulse_sum_contact *psc, phys_vec3 &s_ )
 {
   phys_vec3 f = s_.GetX() * psc->m_ud_n + s_.GetY() * psc->m_ud_f1 + s_.GetZ() * psc->m_ud_f2;
   psc->m_b1->t_vel += psc->m_b1->m_inv_mass * f;
@@ -147,7 +147,7 @@ void pulse_sum_contact_point::apply( pulse_sum_contact *psc, phys_vec3 &s_ )
   }
 }
 
-void pulse_sum_contact_point::clamp_n( pulse_sum_contact *psc )
+inline void pulse_sum_contact_point::clamp_n( pulse_sum_contact *psc )
 {
   if ( m_pulse_sum.GetX() > 0.0f )
   {
@@ -155,7 +155,7 @@ void pulse_sum_contact_point::clamp_n( pulse_sum_contact *psc )
   }
 }
 
-void pulse_sum_contact_point::clamp_f( pulse_sum_contact *psc )
+inline void pulse_sum_contact_point::clamp_f( pulse_sum_contact *psc )
 {
   const float m_pulse_sum_fric_limit = -psc->m_fric_coef * m_pulse_sum.GetX();
   const float pulse_sum_fric_sq = phys_sqr( m_pulse_sum.GetY() ) + phys_sqr( m_pulse_sum.GetZ() );
@@ -169,36 +169,36 @@ void pulse_sum_contact_point::clamp_f( pulse_sum_contact *psc )
   }
 }
 
-void pulse_sum_contact_point::project( pulse_sum_contact *psc )
+inline void pulse_sum_contact_point::project( pulse_sum_contact *psc )
 {
   clamp_n( psc );
   clamp_f( psc );
   apply( psc, m_pulse_sum );
 }
 
-phys_vec3 &pulse_sum_contact_point::object_vel_()
+inline phys_vec3 &pulse_sum_contact_point::object_vel_()
 {
   return m_b1_ap_n;
 }
 
-phys_vec3 &pulse_sum_contact_point::object_col_pt_()
+inline phys_vec3 &pulse_sum_contact_point::object_col_pt_()
 {
   return m_b1_r;
 }
 
-void pulse_sum_contact_point::set_object_vel( pulse_sum_contact *psc, phys_vec3 &object_vel )
+inline void pulse_sum_contact_point::set_object_vel( pulse_sum_contact *psc, phys_vec3 &object_vel )
 {
   tlAssert( psc->m_b2 == NULL );
   m_b2_ap_n = object_vel;
 }
 
-void pulse_sum_contact_point::set_object_col_pt( pulse_sum_contact *psc, phys_vec3 &object_vel )
+inline void pulse_sum_contact_point::set_object_col_pt( pulse_sum_contact *psc, phys_vec3 &object_vel )
 {
   tlAssert( psc->m_b2 == NULL );
   m_b2_r = object_vel;
 }
 
-void pulse_sum_contact_point::SOLVER_apply_relaxation( pulse_sum_contact *psc, float &error_sq )
+inline void pulse_sum_contact_point::SOLVER_apply_relaxation( pulse_sum_contact *psc, float &error_sq )
 {
   phys_vec3 m_last_pulse_sum = m_pulse_sum;
   phys_vec3 _a = get_objective( psc );
@@ -231,7 +231,7 @@ void pulse_sum_contact_point::SOLVER_apply_relaxation( pulse_sum_contact *psc, f
   }
 }
 
-void pulse_sum_contact_point::SOLVER_solver_prolog( pulse_sum_contact *psc, pulse_sum_cache *m_pulse_sum_cache, const float delta_t )
+inline void pulse_sum_contact_point::SOLVER_solver_prolog( pulse_sum_contact *psc, pulse_sum_cache *m_pulse_sum_cache, const float delta_t )
 {
   m_right_side -= get_vel( psc );
   m_pulse_sum[0] = delta_t * m_pulse_sum_cache[0].get_pulse_sum();
@@ -240,7 +240,7 @@ void pulse_sum_contact_point::SOLVER_solver_prolog( pulse_sum_contact *psc, puls
   project( psc );
 }
 
-void pulse_sum_contact_point::SOLVER_solver_intermediate( pulse_sum_contact *psc, pulse_sum_cache *m_pulse_sum_cache, const float delta_t )
+inline void pulse_sum_contact_point::SOLVER_solver_intermediate( pulse_sum_contact *psc, pulse_sum_cache *m_pulse_sum_cache, const float delta_t )
 {
   m_pulse_sum_cache[0].set_pulse_sum( m_pulse_sum.GetX() / delta_t );
   m_pulse_sum_cache[1].set_pulse_sum( m_pulse_sum.GetY() / delta_t );
@@ -248,7 +248,7 @@ void pulse_sum_contact_point::SOLVER_solver_intermediate( pulse_sum_contact *psc
   m_right_side[0] += m_big_dirt;
 }
 
-void pulse_sum_contact_point::setup_vel_uni_restitution( pulse_sum_contact *psc,
+inline void pulse_sum_contact_point::setup_vel_uni_restitution( pulse_sum_contact *psc,
                                                          const float restitution_k,
                                                          const float max_restitution_v,
                                                          const float delta_t,
@@ -297,7 +297,7 @@ void pulse_sum_contact_point::setup_vel_uni_restitution( pulse_sum_contact *psc,
 
 inline pulse_sum_contact_point::pulse_sum_contact_point() {}
 
-void pulse_sum_contact::SOLVER_apply_relaxation( float &error_sq )
+inline void pulse_sum_contact::SOLVER_apply_relaxation( float &error_sq )
 {
   pulse_sum_contact_point *last_pscp_i = &m_list_pscp[m_list_pscp_count];
   for ( pulse_sum_contact_point *pscp_i = m_list_pscp; pscp_i != last_pscp_i; ++pscp_i )
@@ -306,7 +306,7 @@ void pulse_sum_contact::SOLVER_apply_relaxation( float &error_sq )
   }
 }
 
-void pulse_sum_contact::SOLVER_solver_prolog( const float delta_t )
+inline void pulse_sum_contact::SOLVER_solver_prolog( const float delta_t )
 {
   contact_point_info::pulse_sum_cache_info *ps_cache_info =
       reinterpret_cast<contact_point_info::pulse_sum_cache_info *>( m_pulse_sum_cache_list );
@@ -318,7 +318,7 @@ void pulse_sum_contact::SOLVER_solver_prolog( const float delta_t )
   }
 }
 
-void pulse_sum_contact::SOLVER_solver_intermediate( const float delta_t )
+inline void pulse_sum_contact::SOLVER_solver_intermediate( const float delta_t )
 {
   contact_point_info::pulse_sum_cache_info *ps_cache_info =
       reinterpret_cast<contact_point_info::pulse_sum_cache_info *>( m_pulse_sum_cache_list );
@@ -330,7 +330,7 @@ void pulse_sum_contact::SOLVER_solver_intermediate( const float delta_t )
   }
 }
 
-void pulse_sum_contact::set( rigid_body *const b1, rigid_body *const b2, contact_point_info *cpi, const float delta_t )
+inline void pulse_sum_contact::set( rigid_body *const b1, rigid_body *const b2, contact_point_info *cpi, const float delta_t )
 {
   tlAssert( b1 );
   tlAssert( b2 );
@@ -385,9 +385,9 @@ void pulse_sum_contact::set( rigid_body *const b1, rigid_body *const b2, contact
   }
 }
 
-const float pulse_sum_contact::get_std_max_penalty_restitution_vel()
+inline const float pulse_sum_contact::get_std_max_penalty_restitution_vel()
 {
   return 50.0f;
 }
 
-pulse_sum_contact::pulse_sum_contact() {}
+inline pulse_sum_contact::pulse_sum_contact() {}

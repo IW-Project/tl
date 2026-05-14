@@ -48,7 +48,7 @@ private:
   void SOLVER_solver_intermediate( const float delta_t );
 
 public:
-  void set( rigid_body *const b1, phys_vec3 &b1_r, rigid_body *const b2, phys_vec3 &b2_r, phys_vec3 &ud, pulse_sum_cache *const ps_cache );
+  void set( rigid_body *const b1, const phys_vec3 &b1_r, rigid_body *const b2, const phys_vec3 &b2_r, const phys_vec3 &ud, pulse_sum_cache *const ps_cache );
   void set_pulse_sum_limits_unbounded();
   void set_pulse_sum_limits_cone( const float pulse_sum_max );
   void set_pulse_sum_limits_negative();
@@ -69,3 +69,5 @@ public:
 
   friend class pulse_sum_constraint_solver;
 };
+
+#include "pulse_sum_angular_inline.h"

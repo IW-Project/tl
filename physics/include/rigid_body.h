@@ -181,5 +181,4 @@ class environment_rigid_body : public rigid_body
 {
 public:
   void set();
-  environment_rigid_body();
 };

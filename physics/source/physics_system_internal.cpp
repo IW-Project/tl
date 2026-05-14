@@ -665,49 +665,6 @@ void physics_system::frame_advance( const float delta_t )
   }
 }
 
-void constraint_solver_process( phys_transient_allocator *transient_buffer, physics_system *psys, const float outside_delta_t )
-{
-  // Check if there are islands to process
-  if ( psys->m_list_island_count > 0 )
-  {
-    extern jqModule phys_jq_constraint_solverModule;
-
-    struct constraint_solver_params
-    {
-      rigid_body **list_island;
-      int list_island_count;
-      int *g_list_island_cur_ptr;
-      int max_vel_iters;
-      int max_vel_pos_iters;
-      float delta_t;
-    };
-
-    int align = tl_max( (int)sizeof( unsigned long ), 4 );
-    constraint_solver_params *params = (constraint_solver_params *)transient_buffer->allocate( sizeof( constraint_solver_params ),
-                                                                                               PHYS_ALIGNOF( constraint_solver_params ),
-                                                                                               0,
-                                                                                               "phys_transient_allocator out of memory." );
-
-    if ( params )
-    {
-      params->list_island = psys->m_list_island;
-      params->list_island_count = psys->m_list_island_count;
-      params->g_list_island_cur_ptr = &g_list_island_cur;
-      params->max_vel_iters = psys->m_max_vel_iters;
-      params->max_vel_pos_iters = psys->m_max_vel_pos_iters;
-      params->delta_t = outside_delta_t;
-
-      phys_task_manager_process( &phys_jq_constraint_solverModule, params, psys->m_list_island_count );
-    }
-  }
-
-  // Flush task manager if needed
-  if ( phys_task_manager_needs_flush() )
-  {
-    phys_task_manager_flush();
-  }
-}
-
 void physics_system::time_step( const float outside_delta_t, const bool last_step )
 {
   set_outside_sub_delta_t( outside_delta_t );

@@ -33,6 +33,7 @@ extern phys_assert_info pai_gjk_cache_system_max_num_gjk_ci;
 extern phys_assert_info pai_max_num_sap_active_pair;
 extern phys_assert_info pai_create_sap_active_pair;
 extern phys_assert_info pai_check_terrain_query_params;
+extern phys_assert_info pai_create_pulse_sum_contact;
 
 #define PHYS_ASSERT( pai_obj, condition, message )                                                               \
   do                                                                                                             \
